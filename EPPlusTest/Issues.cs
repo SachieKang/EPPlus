@@ -2129,7 +2129,7 @@ namespace EPPlusTest
         public void Issue219()
         {
             OpenTemplatePackage("issueFile.xlsx");
-            foreach(var ws in _pck.Workbook.Worksheets)
+            foreach (var ws in _pck.Workbook.Worksheets)
             {
                 Console.WriteLine(ws.Name);
             }
@@ -2150,9 +2150,9 @@ namespace EPPlusTest
 
         [TestMethod]
         public void Issue220()
-        {            
+        {
             OpenPackage("sheetname_pbl.xlsx", true);
-            var ws=_pck.Workbook.Worksheets.Add("Deal's History");
+            var ws = _pck.Workbook.Worksheets.Add("Deal's History");
             var a = ws.Cells["A:B"];
             ws.AutoFilterAddress = ws.Cells["A1:C3"];
             _pck.Workbook.Names.Add("Test", ws.Cells["B1:D2"]);
@@ -2171,7 +2171,7 @@ namespace EPPlusTest
             //get some test data
             var cars = Car.GenerateList();
 
-            OpenPackage("issue233.xlsx",true);
+            OpenPackage("issue233.xlsx", true);
 
             var sheetName = "Summary_GLEDHOWSUGARCO![]()PTY";
 
@@ -2235,7 +2235,7 @@ namespace EPPlusTest
         {
             OpenTemplatePackage("Font55.xlsx");
             var ws = _pck.Workbook.Worksheets["Sheet1"];
-            var d=ws.Drawings.AddShape("Shape1",eShapeStyle.Diamond);
+            var d = ws.Drawings.AddShape("Shape1", eShapeStyle.Diamond);
             ws.Cells["A1"].Value = "tasetraser";
             ws.Cells.AutoFitColumns();
             SaveWorksheet("Font55-Saved.xlsx");
@@ -2243,7 +2243,7 @@ namespace EPPlusTest
         [TestMethod]
         public void Issue241()
         {
-            OpenPackage("issue241",true);
+            OpenPackage("issue241", true);
             var wks = _pck.Workbook.Worksheets.Add("test");
             wks.DefaultRowHeight = 35;
             _pck.Save();
@@ -2257,7 +2257,7 @@ namespace EPPlusTest
             var defaultStyle = pkg.Workbook.Styles.CreateNamedStyle("Default");
             defaultStyle.Style.Font.Name = "Arial";
             defaultStyle.Style.Font.Size = 18;
-            defaultStyle.Style.Font.UnderLine=true;
+            defaultStyle.Style.Font.UnderLine = true;
             var boldStyle = pkg.Workbook.Styles.CreateNamedStyle("Bold", defaultStyle.Style);
             boldStyle.Style.Font.Color.SetColor(Color.Red);
 
@@ -2267,8 +2267,164 @@ namespace EPPlusTest
             Assert.AreEqual("Arial", boldStyle.Style.Font.Name);
             Assert.AreEqual(18, boldStyle.Style.Font.Size);
             Assert.AreEqual(boldStyle.Style.Font.Color.Rgb, "FFFF0000");
-        
+
             pkg.SaveAs(new FileInfo(@"c:\temp\n.xlsx"));
         }
-    }        
+        [TestMethod]
+        public void Issue332()
+        {
+            InitBase();
+            var pkg = OpenPackage("Hyperlink.xlsx", true);
+            var ws = pkg.Workbook.Worksheets.Add("Hyperlink");
+            ws.Cells["A1"].Hyperlink = new ExcelHyperLink("A2", "A2");
+            pkg.Save();
+        }
+        [TestMethod]
+        public void Issue332_2()
+        {
+            InitBase();
+            var pkg = OpenPackage("Hyperlink.xlsx");
+            var ws = pkg.Workbook.Worksheets["Hyperlink"];
+            Assert.IsNotNull(ws.Cells["A1"].Hyperlink);
+        }
+        [TestMethod]
+        public void Issuer246()
+        {
+            InitBase();
+            var pkg = OpenPackage("issue246.xlsx", true);
+            var ws = _pck.Workbook.Worksheets.Add("DateFormat");
+            ws.Cells["A1"].Value = 43465;
+            ws.Cells["A1"].Style.Numberformat.Format = @"[$-F800]dddd,\ mmmm\ dd,\ yyyy";
+            _pck.Save();
+
+            pkg = OpenPackage("issue246.xlsx");
+            ws = _pck.Workbook.Worksheets["DateFormat"];
+            var pCulture = System.Threading.Thread.CurrentThread.CurrentCulture;
+            System.Threading.Thread.CurrentThread.CurrentCulture = new CultureInfo("sv-Se");
+            Assert.AreEqual(ws.Cells["A1"].Text, "den 31 december 2018");
+            Assert.AreEqual(ws.GetValue<DateTime>(1, 1), new DateTime(2018, 12, 31));
+            System.Threading.Thread.CurrentThread.CurrentCulture = pCulture;
+        }
+        [TestMethod]
+        public void Issue347()
+        {
+            var package = OpenTemplatePackage("Issue327.xlsx");
+            var templateWS = package.Workbook.Worksheets["Template"];
+            //package.Workbook.Worksheets.Add("NewWs", templateWS);
+            package.Workbook.Worksheets.Delete(templateWS);
+        }
+        [TestMethod]
+        public void Issue348()
+        {
+            using (ExcelPackage pck = new ExcelPackage())
+            {
+                ExcelWorksheet ws = pck.Workbook.Worksheets.Add("S1");
+                string formula = "VLOOKUP(C2,A:B,1,0)";
+                ws.Cells[2, 4].Formula = formula;
+                var t1 = ws.Cells[2, 4].FormulaR1C1; // VLOOKUP(C2,C[-3]:C[-2],1,0)
+                ws.Cells[2, 5].FormulaR1C1 = ws.Cells[2, 4].FormulaR1C1;
+                var t2 = ws.Cells[2, 5].FormulaR1C1; // VLOOKUP(C2,C[-3]**:B:C:C**,1,0)   //unexpected value here
+            }
+        }
+
+        [TestMethod, Ignore]
+        public void Issue376()
+        {
+            using (ExcelPackage pck = new ExcelPackage())
+            {
+                ExcelWorksheet ws = pck.Workbook.Worksheets.Add("test");
+                var v = ws.DataValidations.AddListValidation("A1");
+                v.Formula.Values.Add("1");
+                v.Formula.Values.Add("2");
+                v.ShowErrorMessage = true;
+                v.Error = "error!";
+                v.ErrorStyle = OfficeOpenXml.DataValidation.ExcelDataValidationWarningStyle.stop;
+                v.AllowBlank = false;
+                pck.SaveAs(new FileInfo(@"c:\temp\book.xlsx"));
+            }
+        }
+
+        [TestMethod]
+        public void Issue367()
+        {
+            using (var pck = OpenTemplatePackage(@"ProductFunctionTest.xlsx"))
+            {
+                var sheet = pck.Workbook.Worksheets.First();
+                //sheet.Cells["B13"].Value = null;
+                sheet.Cells["B14"].Value = 11;
+                sheet.Cells["B15"].Value = 13;
+                sheet.Cells["B16"].Formula = "Product(B13:B15)";
+                sheet.Calculate();
+
+                Assert.AreEqual(0d, sheet.Cells["B16"].Value);
+            }
+        }
+        [TestMethod]
+        public void Issue345()
+        {
+            using (ExcelPackage package = OpenTemplatePackage("issue345.xlsx"))
+            {
+                var worksheet = package.Workbook.Worksheets["test"];
+                int[] sortColumns = new int[1];
+                sortColumns[0] = 0;
+                worksheet.Cells["A2:A30864"].Sort(sortColumns);
+                package.Save();
+            }
+        }
+        [TestMethod]
+        public void Issue387()
+        {
+
+            using (ExcelPackage package = OpenTemplatePackage("issue345.xlsx"))
+            {
+                var workbook = package.Workbook;
+                var worksheet = workbook.Worksheets.Add("One");
+
+                worksheet.Cells[1, 3].Value = "Hello";
+                var cells = worksheet.Cells["A3"];
+
+                worksheet.Names.Add("R0", cells);
+                workbook.Names.Add("Q0", cells);
+            }
+        }
+        [TestMethod]
+        public void Issue333()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var ws = package.Workbook.Worksheets.Add("TextBug");
+                ws.Cells["A1"].Value = new DateTime(2019, 3, 7);
+                ws.Cells["A1"].Style.Numberformat.Format = "mm-dd-yy";
+
+                Assert.AreEqual("2019-03-07", ws.Cells["A1"].Text);
+            }
+        }
+        [TestMethod]
+        public void Issue445()
+        {
+            ExcelPackage p = new ExcelPackage();
+            ExcelWorksheet ws = p.Workbook.Worksheets.Add("AutoFit"); //<-- This line takes forever. The process hangs.
+            ws.Cells[1, 1].Value = new string('a', 50000);
+            ws.Cells[1, 1].AutoFitColumns();
+        }
+        [TestMethod]
+        public void Issue460()
+        {
+            var p = OpenTemplatePackage("Issue460.xlsx");
+            var ws = p.Workbook.Worksheets[0];
+            var newWs=p.Workbook.Worksheets.Add("NewSheet");
+            ws.Cells.Copy(newWs.Cells);
+            SaveWorksheet("Issue460_saved.xlsx");
+        }
+        [TestMethod]
+        public void Issue476()
+        {
+            var p = OpenTemplatePackage("Issue345.xlsx");
+            var ws = p.Workbook.Worksheets[0];
+            int[] sortColumns = new int[1];
+            sortColumns[0] = 0;
+            ws.Cells["A2:A64515"].Sort(sortColumns);
+            SaveWorksheet("Issue345_saved.xlsx");
+        }
+    }
 }
