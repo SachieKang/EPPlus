@@ -41,13 +41,14 @@ namespace OfficeOpenXml.DataValidation
     /// </summary>
     public enum ExcelDataValidationOperator
     {
-        between = 0,
-        equal = 2,
-        greaterThan = 6,
-        greaterThanOrEqual = 7,
-        lessThan = 4,
-        lessThanOrEqual = 5,
-        notBetween = 1,
-        notEqual= 3
+        any,
+        equal,
+        notEqual,
+        lessThan,
+        lessThanOrEqual,
+        greaterThan,
+        greaterThanOrEqual,
+        between,
+        notBetween
     }
 }

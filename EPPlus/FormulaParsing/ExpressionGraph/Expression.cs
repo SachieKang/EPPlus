@@ -58,6 +58,12 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
             Operator = null;
         }
 
+        public virtual bool ParentIsLookupFunction
+        {
+            get;
+            set;
+        }
+
         public virtual bool HasChildren
         {
             get { return _children.Any(); }

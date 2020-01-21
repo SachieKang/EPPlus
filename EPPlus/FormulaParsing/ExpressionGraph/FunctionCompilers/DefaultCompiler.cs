@@ -39,31 +39,31 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 {
     public class DefaultCompiler : FunctionCompiler
     {
-        public DefaultCompiler(ExcelFunction function, ParsingContext context)
-            : base(function, context)
+        public DefaultCompiler(ExcelFunction function)
+            : base(function)
         {
 
         }
 
-        public override CompileResult Compile(IEnumerable<Expression> children)
+        public override CompileResult Compile(IEnumerable<Expression> children, ParsingContext context)
         {
             var args = new List<FunctionArgument>();
-            Function.BeforeInvoke(Context);
+            Function.BeforeInvoke(context);
             foreach (var child in children)
             {
                 var compileResult = child.Compile();
                 if (compileResult.IsResultOfSubtotal)
                 {
-                    var arg = new FunctionArgument(compileResult.Result, compileResult.DataType);
+                    var arg = new FunctionArgument(compileResult.Result);
                     arg.SetExcelStateFlag(ExcelCellState.IsResultOfSubtotal);
                     args.Add(arg);
                 }
                 else
                 {
-                    BuildFunctionArguments(compileResult, args);     
+                    BuildFunctionArguments(compileResult.Result, args);     
                 }
             }
-            return Function.Execute(args, Context);
+            return Function.Execute(args, context);
         }
     }
 }

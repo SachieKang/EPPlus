@@ -113,41 +113,21 @@ namespace OfficeOpenXml.DataValidation
         private void Init()
         {
             // set schema node order
-            if(ValidationType == ExcelDataValidationType.List)
-            {
-                SchemaNodeOrder = new string[]{
-                    "type",
-                    "errorStyle",
-                    "allowBlank",
-                    "showInputMessage",
-                    "showErrorMessage",
-                    "errorTitle",
-                    "error",
-                    "promptTitle",
-                    "prompt",
-                    "sqref",
-                    "formula1"
-                };
-            }
-            else
-            {
-                SchemaNodeOrder = new string[]{
-                    "type",
-                    "errorStyle",
-                    "operator",
-                    "allowBlank",
-                    "showInputMessage",
-                    "showErrorMessage",
-                    "errorTitle",
-                    "error",
-                    "promptTitle",
-                    "prompt",
-                    "sqref",
-                    "formula1",
-                    "formula2"
-                };
-            }
-            
+            SchemaNodeOrder = new string[]{ 
+                "type", 
+                "errorStyle", 
+                "operator", 
+                "allowBlank",
+                "showInputMessage", 
+                "showErrorMessage", 
+                "errorTitle", 
+                "error", 
+                "promptTitle", 
+                "prompt", 
+                "sqref",
+                "formula1",
+                "formula2"
+            };
         }
 
         private string CheckAndFixRangeAddress(string address)

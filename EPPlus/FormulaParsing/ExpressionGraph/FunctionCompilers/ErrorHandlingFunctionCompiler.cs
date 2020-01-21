@@ -39,21 +39,21 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 {
     public class ErrorHandlingFunctionCompiler : FunctionCompiler
     {
-        public ErrorHandlingFunctionCompiler(ExcelFunction function, ParsingContext context)
-            : base(function, context)
+        public ErrorHandlingFunctionCompiler(ExcelFunction function)
+            : base(function)
         {
 
         }
-        public override CompileResult Compile(IEnumerable<Expression> children)
+        public override CompileResult Compile(IEnumerable<Expression> children, ParsingContext context)
         {
             var args = new List<FunctionArgument>();
-            Function.BeforeInvoke(Context);
+            Function.BeforeInvoke(context);
             foreach (var child in children)
             {
                 try
                 {
                     var arg = child.Compile();
-                    BuildFunctionArguments(arg != null ? arg : null, args);
+                    BuildFunctionArguments(arg != null ? arg.Result : null, args);
                 }
                 catch (ExcelErrorValueException efe)
                 {
@@ -65,7 +65,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
                 }
                 
             }
-            return Function.Execute(args, Context);
+            return Function.Execute(args, context);
         }
     }
 }

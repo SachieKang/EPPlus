@@ -198,21 +198,12 @@ namespace OfficeOpenXml.Style.XmlAccess
         #region Excel --> .Net Format
         internal class ExcelFormatTranslator
         {
-            internal enum eSystemDateFormat
-            {
-                None,
-                SystemLongDate,
-                SystemLongTime,
-                Conditional,
-                SystemShortDate,
-            }
             internal ExcelFormatTranslator(string format, int numFmtID)
             {
                 if (numFmtID == 14)
                 {
-                    NetFormat = NetFormatForWidth = "";
+                    NetFormat = NetFormatForWidth = "d";
                     NetTextFormat = NetTextFormatForWidth = "";
-                    SpecialDateFormat = eSystemDateFormat.SystemShortDate;
                     DataType = eFormatType.DateTime;
                 }
                 else if (format.Equals("general",StringComparison.OrdinalIgnoreCase))
@@ -248,8 +239,11 @@ namespace OfficeOpenXml.Style.XmlAccess
             internal eFormatType DataType { get; private set; }
             internal string NetTextFormatForWidth { get; private set; }
             internal string NetFormatForWidth { get; private set; }
+
+            //internal string FractionFormatInteger { get; private set; }
             internal string FractionFormat { get; private set; }
-            internal eSystemDateFormat SpecialDateFormat { get; private set; }
+            //internal string FractionFormat2 { get; private set; }
+
             private void ToNetFormat(string ExcelFormat, bool forColWidth)
             {
                 DataType = eFormatType.Unknown;
@@ -262,6 +256,7 @@ namespace OfficeOpenXml.Style.XmlAccess
                 bool prevUnderScore = false;
                 bool ignoreNext = false;
                 int fractionPos = -1;
+                string specialDateFormat = "";
                 bool containsAmPm = ExcelFormat.Contains("AM/PM");
                 List<int> lstDec=new List<int>();
                 StringBuilder sb = new StringBuilder();
@@ -310,11 +305,11 @@ namespace OfficeOpenXml.Style.XmlAccess
                                     {
                                         if (li[1].Equals("f800", StringComparison.OrdinalIgnoreCase))
                                         {
-                                            SpecialDateFormat=eSystemDateFormat.SystemLongDate;
+                                            specialDateFormat = "D";
                                         }
                                         else if (li[1].Equals("f400", StringComparison.OrdinalIgnoreCase))
                                         {
-                                            SpecialDateFormat = eSystemDateFormat.SystemLongTime;
+                                            specialDateFormat = "T";
                                         }
                                         else
                                         {
@@ -330,16 +325,13 @@ namespace OfficeOpenXml.Style.XmlAccess
                                         }
                                     }
                                 }
-                                else if(bracketText.StartsWith("<") ||
-                                        bracketText.StartsWith(">") ||
-                                        bracketText.StartsWith("=")) //Conditional
+                                else if(bracketText[0]=='t')
                                 {
-                                    SpecialDateFormat = eSystemDateFormat.Conditional;
+                                    sb.Append("hh"); //TODO:This will not be correct for dates over 24H.
                                 }
-                                else 
+                                else if (bracketText[0] == 'h')
                                 {
-                                    sb.Append(bracketText);
-                                    SpecialDateFormat = eSystemDateFormat.Conditional;
+                                    specialDateFormat = "hh"; //TODO:This will not be correct for dates over 24H.
                                 }
                             }
                             else
@@ -521,6 +513,10 @@ namespace OfficeOpenXml.Style.XmlAccess
                     format = sb.ToString();
                 else
                     text = sb.ToString();
+                if (specialDateFormat != "")
+                {
+                    format = specialDateFormat;
+                }
 
                 if (forColWidth)
                 {

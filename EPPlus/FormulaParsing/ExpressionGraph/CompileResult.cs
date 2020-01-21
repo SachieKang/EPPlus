@@ -185,12 +185,5 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 		public bool IsResultOfSubtotal { get; set; }
 
         public bool IsHiddenCell { get; set; }
-
-        public int ExcelAddressReferenceId { get; set; }
-
-        public bool IsResultOfResolvedExcelRange
-        {
-            get { return ExcelAddressReferenceId > 0; }
-        }
     }
 }

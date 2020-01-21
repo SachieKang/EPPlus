@@ -56,7 +56,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
             : base(expression)
         {
             _parsingContext = parsingContext;
-            _functionCompilerFactory = new FunctionCompilerFactory(parsingContext.Configuration.FunctionRepository, parsingContext);
+            _functionCompilerFactory = new FunctionCompilerFactory(parsingContext.Configuration.FunctionRepository);
             _isNegated = isNegated;
             base.AddChild(new FunctionArgumentExpression(this));
         }
@@ -84,7 +84,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
                     _parsingContext.Configuration.Logger.LogFunction(ExpressionString);
                 }
                 var compiler = _functionCompilerFactory.Create(function);
-                var result = compiler.Compile(HasChildren ? Children : Enumerable.Empty<Expression>());
+                var result = compiler.Compile(HasChildren ? Children : Enumerable.Empty<Expression>(), _parsingContext);
                 if (_isNegated)
                 {
                     if (!result.IsNumeric)

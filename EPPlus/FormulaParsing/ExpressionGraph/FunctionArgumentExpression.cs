@@ -45,6 +45,22 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
             _function = function;
         }
 
+        public override bool ParentIsLookupFunction
+        {
+            get
+            {
+                return base.ParentIsLookupFunction;
+            }
+            set
+            {
+                base.ParentIsLookupFunction = value;
+                foreach (var child in Children)
+                {
+                    child.ParentIsLookupFunction = value;
+                }
+            }
+        }
+
         public override bool IsGroupedExpression
         {
             get { return false; }

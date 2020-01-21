@@ -38,34 +38,38 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 {
     public class LookupFunctionCompiler : FunctionCompiler
     {
-        public LookupFunctionCompiler(ExcelFunction function, ParsingContext context)
-            : base(function, context)
+        public LookupFunctionCompiler(ExcelFunction function)
+            : base(function)
         {
 
         }
 
-        public override CompileResult Compile(IEnumerable<Expression> children)
+        public override CompileResult Compile(IEnumerable<Expression> children, ParsingContext context)
         {
             var args = new List<FunctionArgument>();
-            Function.BeforeInvoke(Context);
-            for(var x = 0; x < children.Count(); x++)
+            Function.BeforeInvoke(context);
+            var firstChild = true;
+            foreach (var child in children)
             {
-                var child = children.ElementAt(x);
-                //if (x > 0 || Function.SkipArgumentEvaluation)
-                //{
-                //    child.ParentIsLookupFunction = Function.IsLookupFuction;
-                //}
+                if (!firstChild || Function.SkipArgumentEvaluation)
+                {
+                    child.ParentIsLookupFunction = Function.IsLookupFuction;
+                }
+                else
+                {
+                    firstChild = false;
+                }
                 var arg = child.Compile();
                 if (arg != null)
                 {
-                    BuildFunctionArguments(arg, arg.DataType, args);
+                    BuildFunctionArguments(arg.Result, arg.DataType, args);
                 }
                 else
                 {
                     BuildFunctionArguments(null, DataType.Unknown, args);
                 } 
             }
-            return Function.Execute(args, Context);
+            return Function.Execute(args, context);
         }
     }
 }

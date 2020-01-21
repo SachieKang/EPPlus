@@ -9,17 +9,17 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 {
     public class IfNaFunctionCompiler : FunctionCompiler
     {
-        public IfNaFunctionCompiler(ExcelFunction function, ParsingContext context)
-            :base(function, context)
+        public IfNaFunctionCompiler(ExcelFunction function)
+            :base(function)
         {
             
         }
 
-        public override CompileResult Compile(IEnumerable<Expression> children)
+        public override CompileResult Compile(IEnumerable<Expression> children, ParsingContext context)
         {
             if (children.Count() != 2) return new CompileResult(eErrorType.Value);
             var args = new List<FunctionArgument>();
-            Function.BeforeInvoke(Context);
+            Function.BeforeInvoke(context);
             var firstChild = children.First();
             var lastChild = children.ElementAt(1);
             try
@@ -40,7 +40,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
             {
                 args.Add(new FunctionArgument(lastChild.Compile().Result));
             }
-            return Function.Execute(args, Context);
+            return Function.Execute(args, context);
         }
     }
 }

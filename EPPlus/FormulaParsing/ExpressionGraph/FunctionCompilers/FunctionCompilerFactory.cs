@@ -34,21 +34,18 @@ using System.Linq;
 using System.Text;
 using OfficeOpenXml.FormulaParsing.Excel.Functions;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
-using OfficeOpenXml.FormulaParsing.Utilities;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 {
     public class FunctionCompilerFactory
     {
         private readonly Dictionary<Type, FunctionCompiler> _specialCompilers = new Dictionary<Type, FunctionCompiler>();
-        private readonly ParsingContext _context;
-        public FunctionCompilerFactory(FunctionRepository repository, ParsingContext context)
+
+        public FunctionCompilerFactory(FunctionRepository repository)
         {
-            Require.That(context).Named("context").IsNotNull();
-            _context = context;
-            _specialCompilers.Add(typeof(If), new IfFunctionCompiler(repository.GetFunction("if"), context));
-            _specialCompilers.Add(typeof(IfError), new IfErrorFunctionCompiler(repository.GetFunction("iferror"), context));
-            _specialCompilers.Add(typeof(IfNa), new IfNaFunctionCompiler(repository.GetFunction("ifna"), context));
+            _specialCompilers.Add(typeof(If), new IfFunctionCompiler(repository.GetFunction("if")));
+            _specialCompilers.Add(typeof(IfError), new IfErrorFunctionCompiler(repository.GetFunction("iferror")));
+            _specialCompilers.Add(typeof(IfNa), new IfNaFunctionCompiler(repository.GetFunction("ifna")));
             foreach (var key in repository.CustomCompilers.Keys)
             {
               _specialCompilers.Add(key, repository.CustomCompilers[key]);
@@ -62,12 +59,12 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
             {
                 return _specialCompilers[funcType];
             }
-            return new DefaultCompiler(function, _context);
+            return new DefaultCompiler(function);
         }
         public virtual FunctionCompiler Create(ExcelFunction function)
         {
-            if (function.IsLookupFuction) return new LookupFunctionCompiler(function, _context);
-            if (function.IsErrorHandlingFunction) return new ErrorHandlingFunctionCompiler(function, _context);
+            if (function.IsLookupFuction) return new LookupFunctionCompiler(function);
+            if (function.IsErrorHandlingFunction) return new ErrorHandlingFunctionCompiler(function);
             return GetCompilerByType(function);
         }
     }
